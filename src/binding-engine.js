@@ -18,7 +18,10 @@ interface CollectionObserver {
   subscribe(callback: (changeRecords: any) => void): Disposable;
 }
 
-const valueConverterLookupFunction = () => null;
+const lookupFunctions = {
+  bindingBehaviors: () => null,
+  valueConverters: () => null
+};
 
 export class BindingEngine {
   static inject = [ObserverLocator, Parser];
@@ -34,7 +37,7 @@ export class BindingEngine {
       targetProperty,
       this.parser.parse(sourceExpression),
       mode,
-      valueConverterLookupFunction);
+      lookupFunctions);
   }
 
   propertyObserver(obj: Object, propertyName: string): PropertyObserver {
@@ -92,7 +95,7 @@ class ExpressionObserver {
 
   subscribe(callback) {
     if (!this.hasSubscribers()) {
-      this.oldValue = this.expression.evaluate(this.scope, valueConverterLookupFunction);
+      this.oldValue = this.expression.evaluate(this.scope, lookupFunctions);
       this.expression.connect(this, this.scope);
     }
     this.addSubscriber(callback);
@@ -106,7 +109,7 @@ class ExpressionObserver {
   }
 
   call() {
-    let newValue = this.expression.evaluate(this.scope, valueConverterLookupFunction);
+    let newValue = this.expression.evaluate(this.scope, lookupFunctions);
     let oldValue = this.oldValue;
     if (newValue !== oldValue) {
       this.oldValue = newValue;
